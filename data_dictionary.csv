@@ -1,0 +1,100 @@
+name,table,description
+DISTANCE_WALKED,health_records,Linear distance covered while walking. Typical unit mi.
+ENERGY_BURNED,health_records,Active kilocalories expended. Typical unit Cal.
+ENVIRONMENT_LOUDNESS,health_records,Ambient sound level (A‑weighted). Typical unit dBASPL.
+EXERCISE_TIME,health_records,Minutes meeting Apple “Exercise” intensity threshold. Typical unit min.
+HEADPHONE_LOUDNESS,health_records,Output level delivered to headphones. Typical unit dBASPL.
+HEART_RATE,health_records,Instantaneous beats per minute. Typical unit count/min.
+HEART_RATE_VARIABILITY,health_records,Heart‑rate variability (RMSSD). Typical unit ms.
+HEIGHT,health_records,User‑entered body height. Typical unit ft or cm.
+RESPIRATORY_RATE,health_records,Breaths per minute. Typical unit count/min.
+RESTING_HEART_RATE,health_records,Average heart‑rate during rest periods. Typical unit count/min.
+SLEEP_STAGE_ASLEEP_UNKNOWN_STAGE,health_records,Minutes asleep – stage unknown. Typical unit min.
+SLEEP_STAGE_AWAKE,health_records,Minutes awake while in bed. Typical unit min.
+SLEEP_STAGE_DEEP,health_records,Minutes in deep (N3) sleep. Typical unit min.
+SLEEP_STAGE_IN_BED,health_records,Total time in bed (sleep opportunity). Typical unit min.
+SLEEP_STAGE_LIGHT,health_records,Minutes in light (N1+N2) sleep. Typical unit min.
+SLEEP_STAGE_REM,health_records,Minutes in REM sleep. Typical unit min.
+STEP_COUNT,health_records,Number of steps taken. Typical unit count. Business logic: when aggregating Apple Health step data, prefer Apple Watch records over iPhone over other devices for overlapping intervals (priority Apple Watch=2, iPhone=1, other=0). Sort records by start_time ascending and device priority descending, then filter overlapping time spans keeping only the first non-overlapping record. A recursive CTE may be used to implement this logic in SQL.
+TIME_IN_SUNLIGHT,health_records,Minutes exposed to direct sunlight. Typical unit min.
+VO2_MAX,health_records,Maximal oxygen uptake per kg body mass. Typical unit mL/min·kg.
+WEIGHT,health_records,Body mass. Typical unit lb or kg.
+LOINC_1751-7,lab_data,Albumin [Mass/volume] in Serum or Plasma. Typical unit g/dL. Example test_name variants: Albumin; Albumin, Serum.
+LOINC_2028-9,lab_data,Carbon Dioxide, total [Moles/volume] in Serum or Plasma. Typical unit mmol/L. Example test_name variants: CO2; Carbon Dioxide, Total.
+LOINC_2345-7,lab_data,Glucose [Mass/volume] in Serum or Plasma. Typical unit mg/dL. Example test_name variants: Glucose; Glucose, Serum.
+LOINC_2093-3,lab_data,Cholesterol [Mass/volume] in Serum or Plasma. Typical unit mg/dL. Example test_name variants: Cholesterol; Cholesterol, Total.
+LOINC_11579-0,lab_data,Thyrotropin (TSH) [Units/volume] in Serum or Plasma. Typical unit mIU/L. Example test_name variants: TSH.
+name,table,description
+A/G Ratio,lab_data,Lab result for A/G Ratio.
+Albumin,lab_data,Lab result for Albumin. Typical unit g/dL.
+Albumin Serum,lab_data,Lab result for Albumin, Serum. Typical unit g/dL.
+Alkaline Phosphatase,lab_data,Lab result for Alkaline Phosphatase. Typical unit IU/L.
+Alkaline Phosphatase S,lab_data,Lab result for Alkaline Phosphatase, S. Typical unit IU/L.
+ALT (SGPT),lab_data,Lab result for ALT (SGPT). Typical unit IU/L.
+Anion Gap,lab_data,Lab result for Anion Gap. Typical unit mEQ/L.
+AST (SGOT),lab_data,Lab result for AST (SGOT). Typical unit IU/L.
+Baso (Absolute),lab_data,Lab result for Baso (Absolute). Typical unit x10E3/uL.
+Basophils Absolute,lab_data,Lab result for Basophils, Absolute. Typical unit K/uL.
+Basos,lab_data,Lab result for Basos. Typical unit %.
+Bilirubin Total,lab_data,Lab result for Bilirubin, Total. Typical unit mg/dL.
+BUN,lab_data,Lab result for BUN. Typical unit mg/dL.
+BUN/Creatinine Ratio,lab_data,Lab result for BUN/Creatinine Ratio.
+Calcium,lab_data,Lab result for Calcium. Typical unit mg/dL.
+Calcium Serum,lab_data,Lab result for Calcium, Serum. Typical unit mg/dL.
+Carbon Dioxide Total,lab_data,Lab result for Carbon Dioxide, Total. Typical unit mmol/L.
+Chloride,lab_data,Lab result for Chloride. Typical unit mEQ/L.
+Chloride Serum,lab_data,Lab result for Chloride, Serum. Typical unit mmol/L.
+Cholesterol,lab_data,Lab result for Cholesterol. Typical unit mg/dL.
+Cholesterol Total,lab_data,Lab result for Cholesterol, Total. Typical unit mg/dL.
+CO2,lab_data,Lab result for CO2. Typical unit mEQ/L.
+Creatinine,lab_data,Lab result for Creatinine. Typical unit mg/dL.
+Creatinine Serum,lab_data,Lab result for Creatinine, Serum. Typical unit mg/dL.
+eGFR,lab_data,Lab result for eGFR. Typical unit mL/min/1.73.
+eGFR If Africn Am,lab_data,Lab result for eGFR If Africn Am. Typical unit mL/min/1.73.
+eGFR If NonAfricn Am,lab_data,Lab result for eGFR If NonAfricn Am. Typical unit mL/min/1.73.
+Eos,lab_data,Lab result for Eos. Typical unit %.
+Eos (Absolute),lab_data,Lab result for Eos (Absolute). Typical unit x10E3/uL.
+Eosinophils Absolute,lab_data,Lab result for Eosinophils, Absolute. Typical unit K/uL.
+Free Testosterone(Direct),lab_data,Lab result for Free Testosterone(Direct). Typical unit pg/mL.
+Globulin Total,lab_data,Lab result for Globulin, Total. Typical unit g/dL.
+Glucose,lab_data,Lab result for Glucose. Typical unit mg/dL.
+Glucose Serum,lab_data,Lab result for Glucose, Serum. Typical unit mg/dL.
+HDL,lab_data,Lab result for HDL. Typical unit mg/dL.
+HDL Cholesterol,lab_data,Lab result for HDL Cholesterol. Typical unit mg/dL.
+Hematocrit,lab_data,Lab result for Hematocrit. Typical unit %.
+Hemoglobin,lab_data,Lab result for Hemoglobin. Typical unit g/dL.
+Immature Grans (Abs),lab_data,Lab result for Immature Grans (Abs). Typical unit x10E3/uL.
+Immature Granulocytes,lab_data,Lab result for Immature Granulocytes. Typical unit %.
+Immature Granulocytes Absolute,lab_data,Lab result for Immature Granulocytes, Absolute. Typical unit K/uL.
+LDL Calculated,lab_data,Lab result for LDL Calculated. Typical unit mg/dL.
+LDL Cholesterol Calc,lab_data,Lab result for LDL Cholesterol Calc. Typical unit mg/dL.
+Lymphocytes Absolute,lab_data,Lab result for Lymphocytes, Absolute. Typical unit K/uL.
+Lymphs,lab_data,Lab result for Lymphs. Typical unit %.
+Lymphs (Absolute),lab_data,Lab result for Lymphs (Absolute). Typical unit x10E3/uL.
+MCH,lab_data,Lab result for MCH. Typical unit pg.
+MCHC,lab_data,Lab result for MCHC. Typical unit g/dL.
+MCV,lab_data,Lab result for MCV. Typical unit fL.
+Monocytes,lab_data,Lab result for Monocytes. Typical unit %.
+Monocytes(Absolute),lab_data,Lab result for Monocytes(Absolute). Typical unit x10E3/uL.
+Monocytes Absolute,lab_data,Lab result for Monocytes, Absolute. Typical unit K/uL.
+MPV,lab_data,Lab result for MPV. Typical unit fL.
+Neutrophils,lab_data,Lab result for Neutrophils. Typical unit %.
+Neutrophils (Absolute),lab_data,Lab result for Neutrophils (Absolute). Typical unit x10E3/uL.
+Neutrophils Absolute,lab_data,Lab result for Neutrophils, Absolute. Typical unit K/uL.
+nRBC,lab_data,Lab result for nRBC. Typical unit %.
+Platelets,lab_data,Lab result for Platelets. Typical unit x10E3/uL.
+Potassium,lab_data,Lab result for Potassium. Typical unit mEQ/L.
+Potassium Serum,lab_data,Lab result for Potassium, Serum. Typical unit mmol/L.
+Protein Total Serum,lab_data,Lab result for Protein, Total, Serum. Typical unit g/dL.
+RBC,lab_data,Lab result for RBC. Typical unit x10E6/uL.
+RDW,lab_data,Lab result for RDW. Typical unit %.
+RISK,lab_data,Lab result for RISK.
+Sodium,lab_data,Lab result for Sodium. Typical unit mEQ/L.
+Sodium Serum,lab_data,Lab result for Sodium, Serum. Typical unit mmol/L.
+Specific Gravity Urine,lab_data,Lab result for Specific Gravity, Urine.
+Testosterone Serum,lab_data,Lab result for Testosterone, Serum. Typical unit ng/dL.
+Total Protein,lab_data,Lab result for Total Protein. Typical unit g/dL.
+Triglycerides,lab_data,Lab result for Triglycerides. Typical unit mg/dL.
+TSH,lab_data,Lab result for TSH. Typical unit mIU/L.
+VLDL Cholesterol Cal,lab_data,Lab result for VLDL Cholesterol Cal. Typical unit mg/dL.
+WBC,lab_data,Lab result for WBC. Typical unit K/uL.

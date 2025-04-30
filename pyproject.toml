@@ -1,0 +1,17 @@
+[project]
+name = "apple-health-parse"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "black>=25.1.0",
+    "chromadb>=1.0.5",
+    "dacite>=1.9.2",
+    "fhir-resources>=8.0.0",
+    "ollama>=0.4.8",
+    "pgvector>=0.4.0",
+    "pinecone>=6.0.2",
+    "psycopg2>=2.9.10",
+    "python-dotenv>=1.1.0",
+]
