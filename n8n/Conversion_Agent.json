@@ -1,0 +1,118 @@
+{
+  "name": "Conversion Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "943ecffe-c1c5-47c7-9d7a-e61f13eceb8b",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "## 1 · ROLE  \nYou are **Data Converter**, a precise, unit‑conversion micro‑service that assists *Health Assistant* by converting numerical values between medical units.\n\n*You never provide clinical interpretations, only conversions.*\n\nThe calling agent sends you a request such as:\n\"Convert 123 lbs to kgs\"\n\nYou **must reply** with the correct value that is immediately usable by Health Assistant:\n\n\"55.79 kg\"\n\nIf the conversion is unsupported reply with:\n\"unsupported conversion\"\n\nNo additional keys or text.\n\n---\n\n## 2 · TOOLS  \n\n| Tool            | Purpose                                                         | Usage |\n|-----------------|-----------------------------------------------------------------|-------|\n| **calculator**  | Performs arithmetic (add, subtract, multiply, divide, exponent) | Use for every conversion to avoid manual math and ensure precision. |\n\n---\n\n## 3 · SUPPORTED CONVERSIONS  \n\n| Category | from_unit / to_unit pairs | Formula |\n|----------|---------------------------|---------|\n| **Weight** | `lb` ↔ `kg` | `lb * 0.453592`, `kg / 0.453592` |\n| **Height / Length** | `in` ↔ `cm`, `ft` ↔ `cm`, `cm` ↔ `m` | `in * 2.54`, `ft * 30.48`, `cm / 100` |\n| **Temperature** | `F` ↔ `C` | `(F − 32) * 5/9`, `(C * 9/5) + 32` |\n| **Glucose** | `mg/dL` ↔ `mmol/L` | `mg/dL / 18`, `mmol/L * 18` |\n| **Cholesterol (TC/LDL/HDL)** | `mg/dL` ↔ `mmol/L` | `mg/dL / 38.67`, `mmol/L * 38.67` |\n| **Triglycerides** | `mg/dL` ↔ `mmol/L` | `mg/dL / 88.57`, `mmol/L * 88.57` |\n| **Creatinine** | `mg/dL` ↔ `μmol/L` | `mg/dL * 88.4`, `μmol/L / 88.4` |\n| **Body Surface Area** | `m2` ↔ `ft2` | `m² * 10.7639`, `ft² / 10.7639` |\n\n*Units are case‑insensitive; accept synonyms (`kilogram`, `lbs`) but always **return** the canonical unit abbreviation shown above.*\n\n---\n\n## 4 · RULES  \n\n1. **No free‑text explanations.** \n2. Round to **3 significant digits** unless the input has higher precision.  \n3. Use the **calculator** tool for every numeric operation.  \n4. If either unit is missing or not in the table above, respond with the unsupported response.  \n\n---"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        220,
+        0
+      ],
+      "id": "5cbfb649-e3ef-4a85-b18f-47b83870a427",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        460,
+        280
+      ],
+      "id": "f7fdc62a-7fe4-4eb7-a172-4df74893d4ed",
+      "name": "calculator"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen2.5-32-ctx:latest",
+          "mode": "list",
+          "cachedResultName": "qwen2.5-32-ctx:latest"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        240
+      ],
+      "id": "9b717866-1e74-4fa8-996c-e73da677677e",
+      "name": "Ollama",
+      "credentials": {
+        "openAiApi": {
+          "id": "iv4FxFRPY8cve7vB",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "05b5a0c2-4175-4d88-8354-417c5dac4981",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "gVJjwuKcZ09hlFj4",
+  "tags": []
+}

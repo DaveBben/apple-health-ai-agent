@@ -1,0 +1,375 @@
+{
+  "name": "Health Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -120,
+        0
+      ],
+      "id": "f0b8171b-b951-4e9a-a60e-9dbdfeca0832",
+      "name": "When chat message received",
+      "webhookId": "e16b87d0-aca2-4944-a22a-b825dd5d33bd"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 25
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -20,
+        300
+      ],
+      "id": "f2b7c467-a726-4bf1-9091-eef94f637ddc",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to run a SQL query against the user's database of health records and labs data. If the query is not correct, an error message will be returned. If an error is returned, rewrite the query, check the query, and try again.\n\n# Schema Details\nhealth_records,health_records,Stores biometric and activity data imported from Apple HealthKit and related apps/devices. Each row represents one measurement event (instantaneous or interval).\nid,health_records,TEXT. Not nullable. Hex‑encoded SHA‑256 identifier for the underlying HealthKit record. Primary key. Always 64 hex characters; treat as opaque.\ntype,health_records,TEXT. Nullable. HealthKit metric code. Use with unit to interpret value.\nvalue,health_records,TEXT. Nullable. Numeric magnitude recorded in the specified unit. Cast to FLOAT/NUMERIC in queries (value::float).\nunit,health_records,\"TEXT. Nullable. Physical unit abbreviation (e.g., min, count/min, dBASPL). May vary between imperial/metric.\"\nstart_time,health_records,TIMESTAMP WITH TIME ZONE. Nullable. Timestamp when measurement period begins. Use for time‑series ordering & bucketing.\nend_time,health_records,TIMESTAMP WITH TIME ZONE. Nullable. Timestamp when measurement period ends (equal to start_time for instant samples). Interval = end_time - start_time.\nsource_name,health_records,\"TEXT. Nullable. Human‑readable source label as reported by Apple Health. e.g., David’s Apple Watch, AutoSleep.\"\ndevice,health_records,\"TEXT. Nullable. Hardware device category that produced the record. Apple Watch, iPhone, AirPods Pro, NULL if not specified.\"\nlab_data,lab_data,Stores clinical laboratory test results imported from EHR or patient portals. Each row represents one analyte measurement reported at a specific time.\nid,lab_data,INTEGER. Not nullable. Surrogate primary key; auto‑increments via sequence lab_data_id_seq. Stable row identifier.\ntest_name,lab_data,\"TEXT. Nullable. Human‑readable name of the laboratory test as supplied by the lab. May vary in spelling/abbreviation across labs (e.g., ALT (SGPT) vs Alanine Aminotransferase).\"\nloinc_code,lab_data,TEXT. Nullable. LOINC universal code uniquely identifying the analyte/property measured. Use to canonicalise tests irrespective of test_name.\nresult_value,lab_data,REAL. Nullable. Numeric value returned by the lab (floating point). Use together with result_unit; may be NULL for Not Detected.\nresult_unit,lab_data,\"TEXT. Nullable. Unit of measure for result_value (e.g., mg/dL, IU/L, %). Free‑text; harmonise via UCUM if needed.\"\nreference_range,lab_data,\"TEXT. Nullable. Lab‑specific normal range or interpretive threshold string. Formats vary: numeric ranges (3.4–5.0 g/dL), inequality (<=200), or textual (Not Estab.).\"\nissued_datetime,lab_data,TIMESTAMP WITH TIME ZONE. Nullable. Date/time the result was finalised and released to the patient record. Use for temporal analysis or latest‑result queries.\nloinc_relationship,lab_data,loinc_code is authoritative and maps to a single analyte and scale. test_name is human‑friendly; group by loinc_code and use test_name for display.\n\n# Loinc Code\nAlways check if a LOINC code is deprecated before using it. If it is, map it to the preferred active code before querying or presenting it\n\n\n\n\n## Tips\nAlways convert value column from text to a numeric type after filtering by type and unit.\nWhen comparing across tests, normalise result_unit using UCUM or LOINC recommended units; otherwise aggregate only identical units.\n\n### Example Queries\n#### Daily Average Heart Rate (past 7 days)  \n```sql\nSELECT\n  ROUND(AVG(CAST(value AS numeric)), 1) AS average_daily_heart_rate\nFROM health_records\nWHERE type = 'HEART_RATE'\n  AND start_time >= CURRENT_DATE - INTERVAL '7 days'\n  AND start_time <  CURRENT_DATE;\n```\n\n#### Total Sleep Time for 2025‑04‑13  \n```sql\nSELECT\n  SUM(CAST(value AS numeric)) AS total_sleep_minutes\nFROM health_records\nWHERE type LIKE 'SLEEP_STAGE_%'\n  AND type NOT IN ('SLEEP_STAGE_AWAKE','SLEEP_STAGE_IN_BED')\n  AND start_time >= '2025-04-13 00:00:00'::timestamp\n  AND start_time <  '2025-04-14 00:00:00'::timestamp;\n```\n\n#### All AST Results  \n```sql\nSELECT\n  id, test_name, loinc_code, result_value, result_unit,\n  reference_range, issued_datetime\nFROM lab_data\nWHERE loinc_code = '1920-8'  -- AST\n   OR test_name ILIKE '%AST%'\nORDER BY issued_datetime DESC;\n```",
+        "operation": "executeQuery",
+        "query": "{{ $fromAI('query') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        280,
+        500
+      ],
+      "id": "dcb74b28-c152-4f4e-ac6a-019ed9af8b96",
+      "name": "execute_sql",
+      "credentials": {
+        "postgres": {
+          "id": "dHRmMJAks2JzmQZj",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to list the tables available in the database",
+        "operation": "executeQuery",
+        "query": "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        400,
+        500
+      ],
+      "id": "1cf6e5ca-0def-4651-ac65-108e85861fed",
+      "name": "list_tables",
+      "credentials": {
+        "postgres": {
+          "id": "dHRmMJAks2JzmQZj",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "bge-m3:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        660
+      ],
+      "id": "8bcfb640-6138-442d-a5f2-0ac27c76f724",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "xHuYe0MDGOs9IpBW",
+          "name": "Local Ollama service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen2.5-32-ctx:latest",
+          "mode": "list",
+          "cachedResultName": "qwen2.5-32-ctx:latest"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -200,
+        280
+      ],
+      "id": "883a60a9-c2b5-46f3-9168-620f8ed4368c",
+      "name": "Ollama",
+      "credentials": {
+        "openAiApi": {
+          "id": "iv4FxFRPY8cve7vB",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "health_records",
+        "toolDescription": " Performs a natural‑language, semantic (vector) search over the entire data dictionary and representative sample rows. It returns the table and column names, clinical definitions, units, coding systems (e.g., LOINC, SNOMED), and any relevant clinical notes. Use its results to choose the right table/column, confirm units, and understand clinical context before you compose SQL\n\n• **Scan every column description** you retrieve with the `health_records` tool.  \n  – Detect key‑phrases such as **“Business logic:”**, **“Calculation rule:”**,  \n    **“Aggregation logic:”**, **“Casting tip:”**, or **“When aggregating …”**.  \n  – Treat anything that follows these phrases as *authoritative instructions* for\n    how SQL must filter, deduplicate, cast, or aggregate results.\n\n• **If business‑logic is found, you *must* either**  \n  1. **Implement it directly** in the SQL you generate  \n     (e.g. recursive CTE for `STEP_COUNT` deduplication), **or**  \n  2. **Explain to the user** why it cannot be implemented and ask how to proceed.  \n  Skipping or ignoring these rules violates clinical/business requirements.",
+        "tableName": "data_dictionary",
+        "topK": 3,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        460
+      ],
+      "id": "28f5665e-1be6-44ad-b525-1cc7b6d392a3",
+      "name": "rag_tool",
+      "credentials": {
+        "postgres": {
+          "id": "dHRmMJAks2JzmQZj",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=## ROLE  \n**You are Health Assistant**, a virtual physician that interprets a patient’s personal health records and laboratory data.  \nYour job is to extract the most clinically relevant biomarkers, apply evidence‑based guidelines, and translate SQL results into clear, empathetic medical advice **without ever exposing database or SQL details**. **Always** present relevant patient biomarkers that support your advice.\n\n\n## TOOLS  \n| Tool | Purpose | Usage Rules |\n|------|---------|-------------|\n| **medical_expert** | On‑demand clinical‑guidelines oracle. Provides the canonical definition, numeric thresholds, citation, **the minimal biometrics/labs, and preferred units** required to answer any medical question. | **Always call FIRST for every user request** — even if the concept appears obvious. Record the returned definition, thresholds, required data fields, and preferred units **before** invoking `health_records` or composing SQL. |\n| **health_records** | Semantic vector search across the entire data dictionary and sample rows. Returns table & column names, units, coding systems (LOINC, SNOMED), and full column descriptions. | **Always call** after definitions are clear. Scan each description for business‑logic phrases (e.g., “Business logic:”); obey them in SQL. Never query more than one term at a time. If multiple items are needed perform multiple queries. Never include units in your query.|\n| **list_tables** | Lists all tables / categories in the database. | Use only if you need a high‑level overview. |\n| **execute_sql** | Runs secure, parameterized SQL against the database. Retries allowed if an error is returned. | Execute **after** consulting **health_records** and embedding required business logic. |\n| **data_converter** | Converts numerical values between units (lb↔kg, cm↔in, mg/dL↔mmol/L, etc.). Example input: \"Convert 150 lbs to kgs\". | **Call immediately after you receive SQL results** **if** any needed value is not already in the desired unit. Never hard‑code conversion formulas; always offload to this tool. |\n| **calculator**  | Performs arithmetic (add, subtract, multiply, divide, exponent) |Use these tool only after you have used the **data_converter** to convert units. |\n\n---\n\n## TASK FLOW  \n1. **Clarify & Plan** – Restate the user’s question; decide which biomarkers & date range are likely relevant.  \n2. **Consult Medical Expert** – *Always* call `medical_expert` to obtain the authoritative definition, thresholds, required biometrics/labs, and target units.   \n3. **Discover Definitions** – Call **health_records** with the confirmed keywords to get column info and business logic.  \n4. **Translate** – Draft a parameterized SQL query that follows every business‑logic rule.  \n5. **Execute** – Call **execute_sql**. If an error occurs, revise and retry automatically.  \n6. **Contextualize** – Compare results to guideline ranges, historical trends, and thresholds.  \n7. **Conclude** – Deliver an explicit risk statement and guideline‑based next steps. Provide raw SQL results only when explicitly requested.\n\n## CONSTRAINTS  \n1. Choose biomarkers autonomously; never ask the patient to choose.  \n2. Final answers **never** reveal schemas, table names, or SQL.  \n3. **Never** write or run SQL without first calling **health_records**.  \n4. Implement all detected business logic; if impossible, explain why and request user guidance.  \n5. Protect privacy; output only data the user has already provided or requested.\n\n\n## STYLE GUIDE  \n* **Authoritative & Empathetic** – “Let’s look at your most recent lipid panel …”  \n* **Concise & Structured** – Short sentences, bullet points; tables only when they help comprehension.  \n* **Evidence‑Based** – Quote guideline ranges, cite major societies where relevant.  \n* **Actionable** – Offer lifestyle or follow‑up testing advice with concrete timelines.\n\n### Example A – Clear Metric  \n**User:** “What was my average resting heart rate last week?”  \n**Assistant plan (internal):**  \n1. Definition clear → skip medical_expert.  \n2. Call `health_records` with `\"resting heart rate\"`  \n3. Build & run SQL, get `62 bpm`.  \n4. Respond to user:  \n> Your average resting heart rate over the past 7 days was **62 bpm**, well within the normal range of 60‑100 bpm for adults.\n\n### Example B – Ambiguous Concept → medical_expert → SQL  \n**User:** “Am I overweight?”  \n**Assistant internal steps:**  \n1. Ambiguity detected.  \n2. Call `medical_expert` with *“Define ‘overweight’ and list minimal data required.”*  \n   • medical_expert returns:  \n     – Metric: BMI   – Threshold: BMI ≥ 25 kg/m² (WHO 2020)   – Required: Weight (kg), Height (cm)  \n3. Call `health_records` with `\"weight\", \"height\"`; note units & business logic.  \n4. Build SQL to fetch latest weight & height, compute BMI, interpret.  \n5. Reply to user with BMI and guidance.\n\n### Example C – Mixed Units Conversion  \n**User:** “How much do I weigh in kilograms?”  \n\n1. `health_records` → column `WEIGHT`, units “lb” & “kg”.  \n2. SQL fetches latest `value`, `unit` without conversion.  \n3. SQL returns `{ value: 163, unit: 'lb' }`.  \n4. Call `data_converter` → `{ value: 73.9, unit: 'kg' }`.  \n5. Reply: “Your most recent weight is **73.9 kg (163 lb)**, recorded on 2025‑04‑18.”\n\n### Example D – Business Logic Detected  \n**health_records** returns description for STEP_COUNT containing:  \n> *Business logic: Prefer Apple Watch over iPhone for overlapping intervals …*  \nAssistant embeds a recursive CTE implementing that deduplication in the SQL query.\n\n\n## ADDITIONAL CONTEXT  \n- Current date/time: `{{ $now }}`  \n- Weekday: `{{ $now.extract('weekday') }}`  \n- Time zone: Eastern Standard Time (EST)\n- The Patient is a 29 year old black Male\n",
+          "maxIterations": 30
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        140,
+        0
+      ],
+      "id": "a1f1c0f1-fe50-4120-a3d2-6cdf7512a529",
+      "name": "Health Assistant"
+    },
+    {
+      "parameters": {
+        "name": "medical_expert",
+        "description": "A clinical reference expert. Input: medical term or question. Output: definition, numeric thresholds, citation, and minimal required biometrics/labs. ",
+        "workflowId": {
+          "__rl": true,
+          "value": "uKnN7Mmi5OAMIgbL",
+          "mode": "list",
+          "cachedResultName": "Health Expert"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [
+            ""
+          ],
+          "schema": [
+            {
+              "id": "",
+              "displayName": "",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        140
+      ],
+      "id": "b643f670-cbdb-4cf8-950c-fb0fbc2e2249",
+      "name": "medical_expert"
+    },
+    {
+      "parameters": {
+        "name": "data_converter",
+        "description": "Use this tool when you want to convert converts numerical values between units (lb↔kg, cm↔in, mg/dL↔mmol/L, etc.). \n\nExample:\nConvert 123 lbs to kgs.\nConvert 8 mg/dL to mmol/L\nConvert 4 ft to cm\n",
+        "workflowId": {
+          "__rl": true,
+          "value": "gVJjwuKcZ09hlFj4",
+          "mode": "list",
+          "cachedResultName": "Conversion Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        500,
+        340
+      ],
+      "id": "8959f5bf-bf68-4a25-8f1f-4f60a456d876",
+      "name": "data_converter"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        340,
+        360
+      ],
+      "id": "efde054e-2c97-4b92-8e71-891ba1a31146",
+      "name": "calculator"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Health Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Health Assistant",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "execute_sql": {
+      "ai_tool": [
+        [
+          {
+            "node": "Health Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "list_tables": {
+      "ai_tool": [
+        [
+          {
+            "node": "Health Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "rag_tool",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Health Assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "rag_tool": {
+      "ai_vectorStore": [
+        []
+      ],
+      "ai_tool": [
+        [
+          {
+            "node": "Health Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Health Assistant": {
+      "main": [
+        []
+      ]
+    },
+    "medical_expert": {
+      "ai_tool": [
+        [
+          {
+            "node": "Health Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "data_converter": {
+      "ai_tool": [
+        [
+          {
+            "node": "Health Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Health Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "919ff121-d24a-496a-8c9e-bc6804bdb4b1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "maupOIbvnOo9Ez6W",
+  "tags": []
+}

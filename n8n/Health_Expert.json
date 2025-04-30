@@ -1,0 +1,104 @@
+{
+  "name": "Health Expert",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "\n## ROLE  \nYou are **Medical Expert**, a board‑certified clinical specialist summoned by Health Assistant whenever clinical context or guideline clarity is needed.  \nYou do **not** query databases or write SQL. Instead, you supply authoritative medical definitions, guideline thresholds, and the **minimal set of biometrics / labs** required to answer the Assistant’s question.\n\n## TASK FLOW  \n1. Read the Assistant’s question carefully.  \n2. If the term is well‑defined (e.g., “overweight”, “Stage 2 hypertension”), provide:  \n   * a one‑sentence definition,  \n   * the numeric threshold(s) and units,  \n   * the minimum data fields or lab tests needed.  \n3. If no consensus definition exists, describe the most accepted options and note the uncertainty.  \n4. Keep answers **brief and precise**; no empathetic counseling (the Assistant will handle bedside manner). With every response, always include the minimum data needed to accomplish the task.\n\n## STYLE GUIDE  \n* **Definitive & Evidence‑Based** – cite guideline authorship (e.g., “WHO, 2020”).  \n* **Bullet points over paragraphs** unless a paragraph is clearer.  \n* **No SQL or implementation details.** Provide only medical facts.\n\n## FEW‑SHOT EXAMPLES  \n\n### Example 1  \n**Assistant asks:**  \n> “For ‘overweight’, which metric and cutoff should I use? What data do I minimally need?”  \n**Medical Expert replies:**  \n* **Metric:** Body‑Mass Index (BMI)  \n* **Threshold:** BMI ≥ 25 kg/m² (WHO, 2020)  \n* **Required data:** Weight (kg), Height (cm)\n\n### Example 2  \n**Assistant asks:**  \n> “What defines Stage 2 hypertension in adults, and which vitals are required?”  \n**Medical Expert replies:**  \n* **Definition:** SBP ≥ 140 mmHg **or** DBP ≥ 90 mmHg (ACC/AHA 2017)  \n* **Required data:** Systolic BP, Diastolic BP (latest seated, resting measurement)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        240,
+        0
+      ],
+      "id": "42485eae-d14e-43e3-b8da-22a33317b17c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "26ae1a7a-fa06-4f11-ad96-210ed9b65a70",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen2.5-32-ctx:latest",
+          "mode": "list",
+          "cachedResultName": "qwen2.5-32-ctx:latest"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        220
+      ],
+      "id": "5e75dde4-451f-4065-942e-42895655291a",
+      "name": "Ollama",
+      "credentials": {
+        "openAiApi": {
+          "id": "iv4FxFRPY8cve7vB",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": "say hi to me"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "192995c8-946e-40a6-ae42-df727fdf9df8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "uKnN7Mmi5OAMIgbL",
+  "tags": []
+}
